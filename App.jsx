@@ -4,6 +4,7 @@ import {
   CircleDollarSign, Dices, LayoutGrid, ChevronLeft, Swords, 
   Trophy, Play, Zap, Loader2, Star, Sparkles, AlertCircle, X, History 
 } from 'lucide-react';
+import './styles.css';
 
 const POKE_API_BASE = 'https://pokeapi.co/api/v2/pokemon';
 
@@ -182,19 +183,8 @@ export default function App() {
     }, 1100);
   };
 
-  const styleContent = `
-        @keyframes dashP { 0% { transform: translate(0,0); } 50% { transform: translate(60px, -60px); } 100% { transform: translate(0,0); } }
-        @keyframes dashE { 0% { transform: translate(0,0); } 50% { transform: translate(-60px, 60px); } 100% { transform: translate(0,0); } }
-        @keyframes dodgeA { 0% { transform: translate(0,0); } 50% { transform: translate(40px, 10px); opacity: 0.5; } 100% { transform: translate(0,0); } }
-        @keyframes shakeH { 0% { transform: translate(0,0); filter: brightness(2); } 25% { transform: translate(-5px, 5px); } 50% { transform: translate(5px, -5px); } 100% { transform: translate(0,0); filter: none; } }
-        .dash-p { animation: dashP 0.4s ease-in-out; } .dash-e { animation: dashE 0.4s ease-in-out; }
-        .dodge-e, .dodge-p { animation: dodgeA 0.4s ease-out; } .hit-p, .hit-e { animation: shakeH 0.4s; }
-        .float { animation: fAnim 3s ease-in-out infinite; } @keyframes fAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-      `;
-
   return (
     <div className="h-screen flex flex-col bg-slate-950 text-white font-sans overflow-hidden">
-      <style dangerouslySetInnerHTML={{__html: styleContent}} />
       <nav className="bg-slate-900 border-b border-white/5 px-6 py-3 flex items-center justify-between shadow-xl z-50">
         <h1 className="font-black text-sm italic uppercase tracking-tighter">Poke<span className="text-red-600">Pro</span> V21</h1>
         <div className="bg-black/50 px-3 py-1 rounded-full border border-white/10 font-black text-[10px] flex items-center gap-1.5 shadow-inner">
