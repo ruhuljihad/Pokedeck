@@ -285,7 +285,7 @@ export default function App() {
                   <Trophy className={"w-16 h-16 mb-4 " + (battleResult === 'win' ? 'text-yellow-400 animate-bounce' : 'text-slate-600')} />
                   <h2 className="text-4xl font-black italic uppercase tracking-tighter">{battleResult === 'win' ? 'Victory!' : 'Defeat'}</h2>
                   {battleResult === 'win' && <div className="mt-4 bg-yellow-500 text-black px-8 py-2 rounded-2xl font-black flex items-center gap-2 shadow-[0_0_20px_rgba(234,179,8,0.5)] scale-110"><CircleDollarSign size={20} /><span className="text-xl">+250 KOIN</span></div>}
-                  <button onClick={() => setView('home')} className="mt-12 w-full py-4 bg-white text-black font-black rounded-2xl uppercase text-[10px] tracking-widest active:scale-95 transition-transform shadow-xl">Kembali</button>
+                  <button onClick={() => setView('select')} className="mt-12 w-full py-4 bg-white text-black font-black rounded-2xl uppercase text-[10px] tracking-widest active:scale-95 transition-transform shadow-xl">Kembali</button>
                 </div>
               )}
             </div>
