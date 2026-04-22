@@ -1,4 +1,3 @@
-```react
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   CircleDollarSign, Dices, LayoutGrid, ChevronLeft, Swords, 
@@ -268,5 +267,3 @@ export default function App() {
     </div>
   );
 }
-
-```
