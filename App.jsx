@@ -72,9 +72,11 @@ const TCGCard = ({ poke, size = "small" }) => {
 };
 
 export default function App() {
+  const [playerName, setPlayerName] = useState('');
+  const [nameInput, setNameInput] = useState('');
   const [coins, setCoins] = useState(300);
   const [inventory, setInventory] = useState([]);
-  const [view, setView] = useState('home'); 
+  const [view, setView] = useState('landing'); 
   const [selectedPoke, setSelectedPoke] = useState(null);
   const [rolling, setRolling] = useState(false);
   const [lastResult, setLastResult] = useState(null);
@@ -90,8 +92,13 @@ export default function App() {
   const timer = useRef(null);
 
   useEffect(() => {
+    const savedName = localStorage.getItem('poke_v21_name');
     const savedCoins = localStorage.getItem('poke_v21_coins');
     const savedInv = localStorage.getItem('poke_v21_inv');
+    if (savedName) {
+      setPlayerName(savedName);
+      setView('home');
+    }
     if (savedInv && JSON.parse(savedInv).length > 0) {
       setInventory(JSON.parse(savedInv));
       if (savedCoins) setCoins(parseInt(savedCoins));
@@ -99,9 +106,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (playerName) localStorage.setItem('poke_v21_name', playerName);
     localStorage.setItem('poke_v21_coins', coins.toString());
     localStorage.setItem('poke_v21_inv', JSON.stringify(inventory));
-  }, [coins, inventory]);
+  }, [coins, inventory, playerName]);
 
   const giveStarter = async () => {
     try {
@@ -185,13 +193,46 @@ export default function App() {
   return (
     <div className="h-screen flex flex-col bg-slate-950 text-white font-sans overflow-hidden">
       <nav className="bg-slate-900 border-b border-white/5 px-6 py-3 flex items-center justify-between shadow-xl z-50">
-        <h1 className="font-black text-sm italic uppercase tracking-tighter">Poke<span className="text-red-600">Pro</span> V21</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="font-black text-sm italic uppercase tracking-tighter">Poke<span className="text-red-600">Pro</span> V21</h1>
+          {playerName && <span className="text-xs font-bold text-slate-400 border-l border-slate-600 pl-3">👤 {playerName}</span>}
+        </div>
         <div className="bg-black/50 px-3 py-1 rounded-full border border-white/10 font-black text-[10px] flex items-center gap-1.5 shadow-inner">
           <CircleDollarSign className="w-3 h-3 text-yellow-500" /> {coins}
         </div>
       </nav>
       <main className="flex-1 overflow-y-auto relative flex flex-col">
         {error && <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[200] bg-red-600 text-white px-6 py-2 rounded-xl shadow-2xl animate-bounce flex items-center gap-2"><AlertCircle size={14} /><span className="text-[10px] font-black uppercase tracking-widest">{error}</span></div>}
+        {view === 'landing' && (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
+            <h1 className="text-5xl font-black italic mb-2 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-500 to-red-600 drop-shadow-2xl">POKEPRO V21</h1>
+            <p className="text-sm text-slate-400 mb-12 font-semibold">Pokémon Trading Card Game</p>
+            <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl mb-8">
+              <p className="text-xs text-slate-300 mb-6 leading-relaxed">🎮 Game Designed by <span className="font-bold text-white">Ruhul</span></p>
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">💡 AI Assistance: <span className="font-semibold">Gemini AI, Claude AI</span></p>
+              <p className="text-xs text-slate-500 mb-8 italic">Pokémon © 2024 Nintendo / The Pokémon Company. All Rights Reserved.</p>
+              <div className="border-t border-white/5 pt-8">
+                <label className="block text-sm font-bold text-slate-300 mb-3">Enter Your Name</label>
+                <input 
+                  type="text" 
+                  value={nameInput} 
+                  onChange={(e) => setNameInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && nameInput.trim() && (setPlayerName(nameInput.trim()), setView('home'))}
+                  placeholder="Your Champion Name" 
+                  maxLength="20"
+                  className="w-full px-4 py-3 bg-slate-800 border-2 border-slate-700 rounded-xl text-white placeholder-slate-600 font-semibold text-center focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/50 transition-all mb-6"
+                />
+                <button 
+                  onClick={() => nameInput.trim() && (setPlayerName(nameInput.trim()), setView('home'))}
+                  disabled={!nameInput.trim()}
+                  className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-xl ${nameInput.trim() ? 'bg-gradient-to-r from-red-600 to-pink-600 border-b-4 border-red-800 text-white hover:shadow-lg' : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'}`}
+                >
+                  ▶ Play Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {view === 'home' && (
           <div className="flex-1 flex flex-col p-4 animate-in fade-in duration-500">
             <div className="flex-1 flex items-center justify-center">
@@ -257,7 +298,7 @@ export default function App() {
         )}
         {view === 'loading' && <div className="flex-1 flex flex-col items-center justify-center"><Loader2 className="animate-spin text-indigo-500 mb-4" size={40} /><p className="font-black uppercase text-[10px] tracking-widest animate-pulse">Arena...</p></div>}
       </main>
-      {view !== 'battle' && view !== 'loading' && (
+      {view !== 'battle' && view !== 'loading' && view !== 'landing' && (
         <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl p-1.5 flex gap-1 z-[300] shadow-2xl border-t-2 border-white/5">
           <button onClick={() => setView('home')} className={"flex-1 py-3.5 rounded-2xl flex flex-col items-center gap-1.5 transition-all " + (view === 'home' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500')}><Dices size={18}/><span className="text-[7px] font-black uppercase">Gacha</span></button>
           <button onClick={() => setView('collection')} className={"flex-1 py-3.5 rounded-2xl flex flex-col items-center gap-1.5 transition-all " + (view === 'collection' || view === 'details' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500')}><LayoutGrid size={18}/><span className="text-[7px] font-black uppercase">Koleksi</span></button>
