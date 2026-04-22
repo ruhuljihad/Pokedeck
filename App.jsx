@@ -139,7 +139,7 @@ export default function App() {
   };
 
   const rollGacha = async () => {
-    if (coins < 100) { setError("KOIN TIDAK CUKUP!"); setTimeout(() => setError(null), 3000); return; }
+    if (coins < 100) { setError("⚠️ Koin tidak cukup! Dapatkan koin dengan memenangkan duel di arena"); setTimeout(() => setError(null), 4000); return; }
     setRolling(true); setLastResult(null);
     try {
       const id = Math.floor(Math.random() * 800) + 1;
