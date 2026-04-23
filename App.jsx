@@ -4,6 +4,7 @@ import {
   Trophy, Play, Zap, Loader2, Star, Sparkles, AlertCircle, X, History 
 } from 'lucide-react';
 import './styles.css';
+import gachaVideo from './Assets/Animasi_Kartu_Video_Portrait_.mp4';
 
 const POKE_API_BASE = 'https://pokeapi.co/api/v2/pokemon';
 
@@ -209,7 +210,7 @@ export default function App() {
           <div className="fixed inset-0 z-[300] bg-black/95 flex flex-col items-center justify-center p-4 animate-in fade-in">
             <video 
               ref={videoRef}
-              src="./Assets/Animasi_Kartu_Video_Portrait_.mp4" 
+              src={gachaVideo}
               autoPlay 
               onEnded={() => setShowGachaVideo(false)}
               className="w-full max-w-[90vw] h-auto max-h-[90vh] object-contain rounded-3xl shadow-2xl"
