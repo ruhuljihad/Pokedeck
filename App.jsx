@@ -89,7 +89,9 @@ export default function App() {
   const [hp, setHp] = useState({ p: 0, pMax: 0, e: 0, eMax: 0 });
   const [effect, setEffect] = useState({ p: null, e: null });
   const [animState, setAnimState] = useState({ p: 'idle', e: 'idle' });
+  const [showGachaVideo, setShowGachaVideo] = useState(false);
   const timer = useRef(null);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const savedName = localStorage.getItem('poke_v21_name');
@@ -140,7 +142,7 @@ export default function App() {
 
   const rollGacha = async () => {
     if (coins < 100) { setError("⚠️ Koin tidak cukup! Dapatkan koin dengan memenangkan duel di arena"); setTimeout(() => setError(null), 4000); return; }
-    setRolling(true); setLastResult(null);
+    setRolling(true); setLastResult(null); setShowGachaVideo(true);
     try {
       const id = Math.floor(Math.random() * 800) + 1;
       const res = await fetch(POKE_API_BASE + "/" + id);
@@ -203,6 +205,18 @@ export default function App() {
       </nav>
       <main className="flex-1 overflow-y-auto relative flex flex-col">
         {error && <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[200] bg-red-600 text-white px-6 py-2 rounded-xl shadow-2xl animate-bounce flex items-center gap-2"><AlertCircle size={14} /><span className="text-[10px] font-black uppercase tracking-widest">{error}</span></div>}
+        {showGachaVideo && (
+          <div className="fixed inset-0 z-[300] bg-black/95 flex flex-col items-center justify-center p-4 animate-in fade-in">
+            <video 
+              ref={videoRef}
+              src="/Assets/Animasi_Kartu_Video_Portrait_.mp4" 
+              autoPlay 
+              onEnded={() => setShowGachaVideo(false)}
+              className="w-full max-w-[90vw] h-auto max-h-[90vh] object-contain rounded-3xl shadow-2xl"
+            />
+            <p className="text-xs text-slate-400 mt-6 font-bold uppercase tracking-widest animate-pulse">Membuka Kartu...</p>
+          </div>
+        )}
         {view === 'landing' && (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
             <h1 className="text-5xl font-black italic mb-2 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-500 to-red-600 drop-shadow-2xl">POKEPRO V21</h1>
