@@ -95,8 +95,29 @@ export default function App() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmNumber, setDeleteConfirmNumber] = useState(null);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
   const timer = useRef(null);
   const videoRef = useRef(null);
+
+  const getSortedInventory = () => {
+    const sorted = [...inventory];
+    if (sortBy === 'rarity-high') {
+      const rarityOrder = { 'LEGENDARY': 0, 'RARE': 1, 'COMMON': 2 };
+      sorted.sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
+    } else if (sortBy === 'rarity-low') {
+      const rarityOrder = { 'COMMON': 0, 'RARE': 1, 'LEGENDARY': 2 };
+      sorted.sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
+    } else if (sortBy === 'name-az') {
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'name-za') {
+      sorted.sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sortBy === 'newest') {
+      sorted.sort((a, b) => b.uid - a.uid);
+    } else if (sortBy === 'oldest') {
+      sorted.sort((a, b) => a.uid - b.uid);
+    }
+    return sorted;
+  };
 
   useEffect(() => {
     const savedName = localStorage.getItem('poke_v21_name');
@@ -315,12 +336,30 @@ export default function App() {
         )}
         {view === 'collection' && (
           <div className="flex-1 flex flex-col p-4 pb-32 animate-in slide-in-from-right-4 duration-300">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-[10px] font-black italic uppercase tracking-widest text-slate-500">Tas Koleksi ({inventory.length})</h2>
               {inventory.length > 0 && <button onClick={() => { setDeleteConfirmNumber(Math.floor(Math.random() * 9000) + 1000); setDeleteConfirmInput(''); setShowDeleteConfirm(true); }} className="text-[9px] font-black px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg uppercase tracking-tight transition-all active:scale-90">🗑️ Hapus Semua</button>}
             </div>
+            {inventory.length > 0 && (
+              <div className="mb-4 flex flex-wrap gap-2">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="text-[9px] font-black px-3 py-2 bg-slate-800 border border-slate-600 text-white rounded-lg uppercase tracking-tight focus:outline-none focus:border-indigo-500 cursor-pointer">
+                  <optgroup label="Rarity">
+                    <option value="rarity-high">Rarity (High to Low)</option>
+                    <option value="rarity-low">Rarity (Low to High)</option>
+                  </optgroup>
+                  <optgroup label="Name">
+                    <option value="name-az">Name (A-Z)</option>
+                    <option value="name-za">Name (Z-A)</option>
+                  </optgroup>
+                  <optgroup label="Acquired">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                  </optgroup>
+                </select>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4 overflow-y-auto">
-              {inventory.map(p => <button key={p.uid} onClick={() => { setSelectedPoke(p); setView('details'); }} className="transition-transform active:scale-95"><TCGCard poke={p} size="small" /></button>)}
+              {getSortedInventory().map(p => <button key={p.uid} onClick={() => { setSelectedPoke(p); setView('details'); }} className="transition-transform active:scale-95"><TCGCard poke={p} size="small" /></button>)}
             </div>
           </div>
         )}
