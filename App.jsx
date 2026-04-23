@@ -331,15 +331,34 @@ export default function App() {
           </div>
         )}
         {view === 'select' && (
-          <div className="flex-1 flex flex-col p-4 pb-32 animate-in slide-in-from-right-4">
-            <div className="flex items-center gap-3 mb-6"><button onClick={() => setView('home')} className="p-2 bg-white/10 rounded-xl"><ChevronLeft size={20}/></button><h2 className="text-[10px] font-black italic uppercase tracking-widest text-slate-500">Pilih Champion</h2></div>
-            <div className="grid grid-cols-2 gap-4 overflow-y-auto">
-              {inventory.map(p => <button key={p.uid} onClick={() => {
-                setPlayerPoke(p); setView('loading');
-                fetch(POKE_API_BASE + "/" + (Math.floor(Math.random()*800)+1)).then(r => r.json()).then(d => {
-                  const enemy = formatPokemon(d); setEnemyPoke(enemy); setHp({ p: p.hp, pMax: p.hp, e: enemy.hp, eMax: enemy.hp }); setView('battle'); setBattleResult(null); setBattleLog([]);
-                }).catch(() => { setView('home'); setError("Arena sibuk."); });
-              }} className="transition-transform active:scale-95"><TCGCard poke={p} size="small" /></button>)}
+          <div className="flex-1 flex flex-col p-4 pb-32 animate-in slide-in-from-left-4">
+            <div className="flex items-center gap-3 mb-6"><button onClick={() => setView('home')} className="p-2 bg-white/10 rounded-xl"><ChevronLeft size={20}/></button><h2 className="text-[10px] font-black italic uppercase tracking-widest text-slate-500">Pilih Champion untuk Arena</h2></div>
+            <div className="flex-1 flex flex-col gap-3 overflow-y-auto">
+              {inventory.map(p => (
+                <button key={p.uid} onClick={() => {
+                  setPlayerPoke(p); setView('loading');
+                  fetch(POKE_API_BASE + "/" + (Math.floor(Math.random()*800)+1)).then(r => r.json()).then(d => {
+                    const enemy = formatPokemon(d); setEnemyPoke(enemy); setHp({ p: p.hp, pMax: p.hp, e: enemy.hp, eMax: enemy.hp }); setView('battle'); setBattleResult(null); setBattleLog([]);
+                  }).catch(() => { setView('home'); setError("Arena sibuk."); });
+                }} className="bg-gradient-to-r from-slate-900 to-slate-800 border-2 border-indigo-600/50 hover:border-indigo-500 rounded-2xl p-4 flex items-center gap-4 transition-all active:scale-95 shadow-lg">
+                  <img src={p.sprite} alt={p.name} className="w-20 h-20 object-contain drop-shadow-lg" />
+                  <div className="flex-1 text-left">
+                    <h3 className="text-lg font-black uppercase capitalize tracking-tight text-white mb-2">{p.name}</h3>
+                    <div className="flex items-center justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-400">HP: <span className="text-indigo-400">{Math.floor(p.hp)}</span></span>
+                      <span className="text-slate-400">ATK: <span className="text-red-400">{p.attack}</span></span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-slate-400">DEF: <span className="text-yellow-400">{p.defense}</span></span>
+                      <span className="text-slate-400">SPD: <span className="text-green-400">{p.speed}</span></span>
+                    </div>
+                    <div className="mt-2 inline-block bg-black/40 px-2 py-1 rounded-lg">
+                      <p className="text-[8px] font-black uppercase tracking-widest text-indigo-300">{p.rarity}</p>
+                    </div>
+                  </div>
+                  <div className="text-indigo-500 font-black text-2xl">⚔️</div>
+                </button>
+              ))}
             </div>
           </div>
         )}
