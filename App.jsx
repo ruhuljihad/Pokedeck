@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import './styles.css';
 import gachaVideo from './Assets/Animasi_Kartu_Video_Portrait_.mp4';
+import defaultCard from './Assets/Default card.jpeg';
 
 const POKE_API_BASE = 'https://pokeapi.co/api/v2/pokemon';
 
@@ -304,7 +305,7 @@ export default function App() {
         {view === 'home' && (
           <div className="flex-1 flex flex-col p-4 animate-in fade-in duration-500">
             <div className="flex-1 flex items-center justify-center">
-              {rolling ? <div className="w-16 h-16 bg-red-600 rounded-full animate-bounce border-4 border-white shadow-2xl"></div> : lastResult ? <TCGCard poke={lastResult} size="large" /> : <div className="opacity-10 text-center flex flex-col items-center gap-6"><Dices size={80} /><p className="font-black uppercase tracking-[0.4em] text-xs">BUKA PAKET KARTU</p></div>}
+              {rolling ? <div className="w-16 h-16 bg-red-600 rounded-full animate-bounce border-4 border-white shadow-2xl"></div> : lastResult ? <TCGCard poke={lastResult} size="large" /> : <img src={defaultCard} alt="Default Card" className="w-[90vw] max-w-[340px] h-auto rounded-2xl shadow-2xl object-contain" />}
             </div>
             <div className="mt-auto space-y-2 pb-24">
               <button onClick={rollGacha} className="w-full py-4 bg-red-600 border-b-4 border-red-800 rounded-2xl font-black text-sm uppercase tracking-widest active:translate-y-1 active:border-b-0 transition-all">Gacha Kartu (100)</button>
