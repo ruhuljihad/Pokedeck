@@ -91,6 +91,9 @@ export default function App() {
   const [effect, setEffect] = useState({ p: null, e: null });
   const [animState, setAnimState] = useState({ p: 'idle', e: 'idle' });
   const [showGachaVideo, setShowGachaVideo] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmNumber, setDeleteConfirmNumber] = useState(null);
+  const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
   const timer = useRef(null);
   const videoRef = useRef(null);
 
@@ -218,6 +221,56 @@ export default function App() {
             <p className="text-xs text-slate-400 mt-6 font-bold uppercase tracking-widest animate-pulse">Membuka Kartu...</p>
           </div>
         )}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[300] bg-black/95 flex flex-col items-center justify-center p-4 animate-in fade-in">
+            <div className="bg-slate-900 border-2 border-red-600 rounded-3xl p-8 max-w-sm w-full shadow-2xl">
+              <h3 className="text-xl font-black uppercase tracking-tight text-red-500 mb-2">⚠️ Konfirmasi Hapus</h3>
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">Anda akan menghapus SEMUA {inventory.length} kartu. Tindakan ini tidak dapat dibatalkan.</p>
+              <div className="bg-black/40 border-2 border-red-500/50 rounded-2xl p-4 mb-6 text-center">
+                <p className="text-xs text-slate-400 mb-2 uppercase tracking-widest font-bold">Masukkan Angka:</p>
+                <p className="text-5xl font-black text-red-500 mb-4 font-mono tracking-wider">{deleteConfirmNumber}</p>
+              </div>
+              <input
+                type="text"
+                value={deleteConfirmInput}
+                onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                placeholder="Ketik angka di atas"
+                maxLength="6"
+                className="w-full px-4 py-3 bg-slate-800 border-2 border-slate-700 rounded-xl text-white placeholder-slate-600 font-black text-center text-lg tracking-widest focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/50 transition-all mb-6"
+              />
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmInput(''); }}
+                  className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-black uppercase text-xs tracking-widest transition-all active:scale-95"
+                >
+                  Batal
+                </button>
+                <button 
+                  onClick={() => {
+                    if (deleteConfirmInput === deleteConfirmNumber.toString()) {
+                      setInventory([]);
+                      setShowDeleteConfirm(false);
+                      setDeleteConfirmInput('');
+                      setError('✅ Semua kartu telah dihapus!');
+                      setTimeout(() => setError(null), 3000);
+                    } else {
+                      setError('❌ Angka tidak sesuai!');
+                      setTimeout(() => setError(null), 2000);
+                    }
+                  }}
+                  disabled={deleteConfirmInput.length === 0}
+                  className={`flex-1 py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 ${
+                    deleteConfirmInput.length === 0
+                      ? 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {view === 'landing' && (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
             <h1 className="text-5xl font-black italic mb-2 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-500 to-red-600 drop-shadow-2xl">POKEPRO V21</h1>
@@ -261,7 +314,10 @@ export default function App() {
         )}
         {view === 'collection' && (
           <div className="flex-1 flex flex-col p-4 pb-32 animate-in slide-in-from-right-4 duration-300">
-            <h2 className="text-[10px] font-black italic mb-6 uppercase tracking-widest text-slate-500">Tas Koleksi ({inventory.length})</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-[10px] font-black italic uppercase tracking-widest text-slate-500">Tas Koleksi ({inventory.length})</h2>
+              {inventory.length > 0 && <button onClick={() => { setDeleteConfirmNumber(Math.floor(Math.random() * 9000) + 1000); setDeleteConfirmInput(''); setShowDeleteConfirm(true); }} className="text-[9px] font-black px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg uppercase tracking-tight transition-all active:scale-90">🗑️ Hapus Semua</button>}
+            </div>
             <div className="grid grid-cols-2 gap-4 overflow-y-auto">
               {inventory.map(p => <button key={p.uid} onClick={() => { setSelectedPoke(p); setView('details'); }} className="transition-transform active:scale-95"><TCGCard poke={p} size="small" /></button>)}
             </div>
