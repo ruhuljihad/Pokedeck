@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import './styles.css';
 import gachaVideo from './Assets/Animasi_Kartu_Video_Portrait_.mp4';
-import defaultCard from './Assets/Default card.jpeg';
+import defaultCard from './Assets/default card.jpeg';
 
 const POKE_API_BASE = 'https://pokeapi.co/api/v2/pokemon';
 
