@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   CircleDollarSign, Dices, LayoutGrid, ChevronLeft, Swords, 
-  Trophy, Play, Zap, Loader2, Star, Sparkles, AlertCircle, X, History 
+  Trophy, Play, Zap, Loader2, Star, Sparkles, AlertCircle, X, History, ChevronRight
 } from 'lucide-react';
 import './styles.css';
 import gachaVideo from './Assets/Animasi_Kartu_Video_Portrait_.mp4';
+import gachaBulkVideo from './Assets/Animasi_Kartu_Video_Portrait_bulk.mp4';
 import defaultCard from './Assets/default card.jpeg';
+import defaultCardBulk from './Assets/default card bulk.jpeg';
 
 const POKE_API_BASE = 'https://pokeapi.co/api/v2/pokemon';
 
@@ -96,6 +98,12 @@ export default function App() {
   const [deleteConfirmNumber, setDeleteConfirmNumber] = useState(null);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  const [gachaMode, setGachaMode] = useState(null);
+  const [bulkResults, setBulkResults] = useState([]);
+  const [bulkCardIndex, setBulkCardIndex] = useState(0);
+  const [showBulkVideo, setShowBulkVideo] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
   const timer = useRef(null);
   const videoRef = useRef(null);
 
@@ -179,6 +187,53 @@ export default function App() {
     finally { setRolling(false); }
   };
 
+  const rollBulkGacha = async () => {
+    if (coins < 950) { setError("⚠️ Koin tidak cukup! Dapatkan koin dengan memenangkan duel di arena"); setTimeout(() => setError(null), 4000); return; }
+    setRolling(true); setBulkResults([]); setBulkCardIndex(0); setShowBulkVideo(true);
+    try {
+      const results = [];
+      for (let i = 0; i < 10; i++) {
+        const id = Math.floor(Math.random() * 800) + 1;
+        const res = await fetch(POKE_API_BASE + "/" + id);
+        const data = await res.json();
+        const p = formatPokemon(data);
+        if (p) results.push(p);
+      }
+      if (results.length > 0) {
+        setCoins(c => c - 950);
+        setInventory(prev => [...results, ...prev]);
+        setBulkResults(results);
+        setView('bulk-results');
+      }
+    } catch (e) { setError("Professor sibuk."); }
+    finally { setRolling(false); }
+  };
+
+  const handleSwipeLeft = () => {
+    if (bulkCardIndex < bulkResults.length - 1) {
+      setBulkCardIndex(bulkCardIndex + 1);
+    }
+  };
+
+  const handleSwipeRight = () => {
+    if (bulkCardIndex > 0) {
+      setBulkCardIndex(bulkCardIndex - 1);
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    setTouchEnd(e.changedTouches[0].clientX);
+    if (touchStart - e.changedTouches[0].clientX > 50) {
+      handleSwipeLeft();
+    } else if (e.changedTouches[0].clientX - touchStart > 50) {
+      handleSwipeRight();
+    }
+  };
+
   const runTurn = (isPlayerAttacking) => {
     if (battleResult) return;
     timer.current = setTimeout(() => {
@@ -235,9 +290,9 @@ export default function App() {
           <div className="fixed inset-0 z-[300] bg-black/95 flex flex-col items-center justify-center p-4 animate-in fade-in">
             <video 
               ref={videoRef}
-              src={gachaVideo}
+              src={gachaMode === 'bulk' ? gachaBulkVideo : gachaVideo}
               autoPlay 
-              onEnded={() => setShowGachaVideo(false)}
+              onEnded={() => { setShowGachaVideo(false); if (gachaMode === 'bulk') { setView('bulk-results'); } }}
               className="w-full max-w-[90vw] h-auto max-h-[90vh] object-contain rounded-3xl shadow-2xl"
             />
             <p className="text-xs text-slate-400 mt-6 font-bold uppercase tracking-widest animate-pulse">Membuka Kartu...</p>
@@ -329,7 +384,8 @@ export default function App() {
               {rolling ? <div className="w-16 h-16 bg-red-600 rounded-full animate-bounce border-4 border-white shadow-2xl"></div> : lastResult ? <TCGCard poke={lastResult} size="large" /> : <img src={defaultCard} alt="Default Card" className="w-[90vw] max-w-[340px] h-auto rounded-2xl shadow-2xl object-contain" />}
             </div>
             <div className="mt-auto space-y-2 pb-24">
-              <button onClick={rollGacha} className="w-full py-4 bg-red-600 border-b-4 border-red-800 rounded-2xl font-black text-sm uppercase tracking-widest active:translate-y-1 active:border-b-0 transition-all">Gacha Kartu (100)</button>
+              <button onClick={() => { setGachaMode('single'); rollGacha(); }} className="w-full py-4 bg-red-600 border-b-4 border-red-800 rounded-2xl font-black text-sm uppercase tracking-widest active:translate-y-1 active:border-b-0 transition-all">Gacha Kartu (100)</button>
+              <button onClick={() => { setGachaMode('bulk'); rollBulkGacha(); }} className="w-full py-4 bg-orange-600 border-b-4 border-orange-800 rounded-2xl font-black text-sm uppercase tracking-widest active:translate-y-1 active:border-b-0 transition-all flex items-center justify-center gap-2">✨ Bulk Gacha (950)</button>
               <button onClick={() => inventory.length > 0 ? setView('select') : setError("Tas Koleksi Kosong!")} className="w-full py-4 bg-indigo-600 border-b-4 border-indigo-800 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 active:translate-y-1 active:border-b-0 transition-all"><Swords size={18} /> Masuk Arena</button>
             </div>
           </div>
@@ -367,6 +423,53 @@ export default function App() {
           <div className="fixed inset-0 z-[250] bg-slate-950/98 flex flex-col p-6 animate-in zoom-in-95">
             <div className="flex justify-between items-center mt-12 mb-8"><div className="w-10"></div><p className="font-black text-xs uppercase tracking-[0.3em] text-slate-400">Inspeksi Kartu</p><button onClick={() => setView('collection')} className="p-2.5 bg-red-600 text-white rounded-full shadow-lg active:scale-90 transition-transform"><X size={20} strokeWidth={3} /></button></div>
             <div className="flex-1 flex flex-col items-center justify-start pt-2 overflow-hidden"><TCGCard poke={selectedPoke} size="large" /></div>
+          </div>
+        )}
+        {view === 'bulk-results' && bulkResults.length > 0 && (
+          <div className="flex-1 flex flex-col p-4 pb-32 animate-in fade-in duration-500">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-[10px] font-black italic uppercase tracking-widest text-slate-500">Bulk Gacha Results</h2>
+              <span className="text-[10px] font-black bg-orange-600 text-white px-3 py-1 rounded-full">{bulkCardIndex + 1}/{bulkResults.length}</span>
+            </div>
+            <div 
+              className="flex-1 flex items-center justify-center pb-8"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div className="relative w-full flex items-center justify-center">
+                {bulkCardIndex > 0 && (
+                  <button 
+                    onClick={handleSwipeRight}
+                    className="absolute left-2 z-10 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all active:scale-90"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+                <div className="flex-1 flex items-center justify-center">
+                  <TCGCard poke={bulkResults[bulkCardIndex]} size="large" />
+                </div>
+                {bulkCardIndex < bulkResults.length - 1 && (
+                  <button 
+                    onClick={handleSwipeLeft}
+                    className="absolute right-2 z-10 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all active:scale-90"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="mt-auto space-y-2">
+              <button 
+                onClick={() => {
+                  setView('home');
+                  setBulkResults([]);
+                  setBulkCardIndex(0);
+                }}
+                className="w-full py-4 bg-green-600 border-b-4 border-green-800 rounded-2xl font-black text-sm uppercase tracking-widest active:translate-y-1 active:border-b-0 transition-all"
+              >
+                💾 Simpan
+              </button>
+            </div>
           </div>
         )}
         {view === 'select' && (
@@ -431,7 +534,7 @@ export default function App() {
         )}
         {view === 'loading' && <div className="flex-1 flex flex-col items-center justify-center"><Loader2 className="animate-spin text-indigo-500 mb-4" size={40} /><p className="font-black uppercase text-[10px] tracking-widest animate-pulse">Arena...</p></div>}
       </main>
-      {view !== 'battle' && view !== 'loading' && view !== 'landing' && (
+      {view !== 'battle' && view !== 'loading' && view !== 'landing' && view !== 'bulk-results' && (
         <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl p-1.5 flex gap-1 z-[300] shadow-2xl border-t-2 border-white/5">
           <button onClick={() => setView('home')} className={"flex-1 py-3.5 rounded-2xl flex flex-col items-center gap-1.5 transition-all " + (view === 'home' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500')}><Dices size={18}/><span className="text-[7px] font-black uppercase">Gacha</span></button>
           <button onClick={() => setView('collection')} className={"flex-1 py-3.5 rounded-2xl flex flex-col items-center gap-1.5 transition-all " + (view === 'collection' || view === 'details' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500')}><LayoutGrid size={18}/><span className="text-[7px] font-black uppercase">Koleksi</span></button>
